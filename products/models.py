@@ -19,11 +19,11 @@ class SubCategory(models.Model) :
 
 class Product(models.Model) :
     sub_category  = models.ForeignKey('SubCategory', on_delete = models.PROTECT)
-    tag           = models.ManyToManyField('Tag', through = 'ProductTag')
+    tags           = models.ManyToManyField('Tag', through = 'ProductTag')
     name          = models.CharField(max_length = 50)
     thumbnail_url = models.CharField(max_length = 1000)
     created_at    = models.DateTimeField(auto_now_add = True)
-    soft_delete   = models.BooleanField(default = False)
+    deleted_at    = models.DateTimeField(null = True)
 
     class Meta :
         db_table = 'products'

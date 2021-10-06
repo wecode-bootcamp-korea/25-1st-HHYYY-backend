@@ -20,7 +20,7 @@ class ReviewComment(models.Model):
     review     = models.ForeignKey('Review', on_delete = models.CASCADE)
     content    = models.CharField(max_length = 200)
     created_at = models.DateTimeField(auto_now_add = True)
-    updated_at = models.CharField(auto_now = True)
+    updated_at = models.DateTimeField(auto_now = True)
     
     class Meta:
         db_table = 'review_comments'
