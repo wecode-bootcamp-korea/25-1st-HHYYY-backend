@@ -4,7 +4,7 @@ from users.models           import User
 from products.models        import Product
 
 class Review(models.Model):
-    user       = models.ForeignKey('users.User', on_delet = models.CASCADE)
+    user       = models.ForeignKey('users.User', on_delete = models.CASCADE)
     product    = models.ForeignKey('products.Product', on_delete = models.CASCADE)
     content    = models.CharField(max_length = 400)
     rating     = models.PositiveIntegerField()
@@ -16,7 +16,7 @@ class Review(models.Model):
         db_table = 'reviews'
 
 class ReviewComment(models.Model):
-    user       = models.ForeignKey('users.User', on_delet = models.CASCADE)
+    user       = models.ForeignKey('users.User', on_delete = models.CASCADE)
     review     = models.ForeignKey('Review', on_delete = models.CASCADE)
     content    = models.CharField(max_length = 200)
     created_at = models.DateTimeField(auto_now_add = True)
