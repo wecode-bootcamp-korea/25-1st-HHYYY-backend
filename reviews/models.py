@@ -25,7 +25,7 @@ class ReviewComment(models.Model):
     class Meta:
         db_table = 'review_comments'
 
-class ReviewLike(models.model):
+class ReviewLike(models.Model):
     user   = models.ForeignKey('users.User', on_delete = models.CASCADE)
     review = models.ForeignKey('Review', on_delete = models.CASCADE)
     
