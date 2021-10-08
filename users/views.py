@@ -6,9 +6,10 @@ import jwt
 from django.http            import JsonResponse
 from django.views           import View
 from json.decoder           import JSONDecodeError
+from django.conf.settings   import SECRET_KEY
 
 from users.models           import User
-from my_settings            import SECRET_KEY, ALGORITHM
+from my_settings            import ALGORITHM
 
 class SignUpView(View):
     def post(self, request):
@@ -20,7 +21,6 @@ class SignUpView(View):
             name         = data.get('name')
             address      = data.get('address')
 
-
             REGEX_EMAIL    = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
             REGEX_PASSWORD = "^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$"
 
@@ -31,7 +31,7 @@ class SignUpView(View):
                 return JsonResponse({'message : INVAILD_PASSWORD'}, status=400)
 
             if User.objects.filter(email=email).exists():
-                return JsonResponse({'message' : 'EMAIL_ALREADY_EXISTS'}, status=404)
+                return JsonResponse({'message' : 'EMAIL_ALREADY_EXISTS'}, status=400)
 
             hashed_password  = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             decoded_password = hashed_password.decode('utf-8')
@@ -58,7 +58,7 @@ class SignInView(View):
             data = json.loads(request.body)
 
             if not User.objects.filter(email=data['email']).exists():
-                return JsonResponse({'message': 'USER_DOSE_NOT_EXIT'}, status=404)
+                return JsonResponse({'message': 'USER_DOSE_NOT_EXIST'}, status=404)
 
             user = User.objects.get(email=data['email'])
 
