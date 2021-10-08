@@ -6,10 +6,9 @@ import jwt
 from django.http            import JsonResponse
 from django.views           import View
 from json.decoder           import JSONDecodeError
-from django.conf.settings   import SECRET_KEY
+from django.conf.settings   import SECRET_KEY, ALGORITHM
 
 from users.models           import User
-from my_settings            import ALGORITHM
 
 class SignUpView(View):
     def post(self, request):
