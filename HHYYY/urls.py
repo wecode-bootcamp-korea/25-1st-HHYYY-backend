@@ -17,7 +17,7 @@ from django.urls                import path, include
 from products.views             import CategoryView, SubCategoryView, NavigatorView
 
 urlpatterns = [
-    
+    path('users', include('users.urls')),
     path('products', include('products.urls')),
     path('category/<int:category_id>', CategoryView.as_view()),
     path('category/subcategory/<int:subcategory_id>', SubCategoryView.as_view()),

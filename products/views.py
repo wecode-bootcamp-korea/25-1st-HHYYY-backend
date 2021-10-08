@@ -56,7 +56,7 @@ class ProductDetailView(View) :
         if not Product.objects.filter(id = product_id).exists() :
             return JsonResponse({'MESSAGE' : 'PRODUCT_DOES_NOT_EXIST'}, status = 404)
         
-        product = Product.objects.prefetch_related('option_set', 'tags', 'detailimage_set').get(id = product_id)
+        product      = Product.objects.prefetch_related('option_set', 'tags', 'detailimage_set').get(id = product_id)
         product_info = {
             'id'            : product.id,
             'name'          : product.name,
@@ -77,7 +77,7 @@ class CategoryView(View) :
         if not Category.objects.filter(id = category_id).exists() :
             return JsonResponse({'MESSAGE' : 'CATEGORY_DOES_NOT_EXIST'}, status = 404)
         
-        category = Category.objects.get(id = category_id)
+        category      = Category.objects.get(id = category_id)
         category_info = {
             'id'             : category.id,
             'name'           : category.name,
@@ -92,7 +92,7 @@ class SubCategoryView(View) :
         if not SubCategory.objects.filter(id = subcategory_id).exists() :
             return JsonResponse({'MESSAGE' : 'SUBCATEGORY_DOES_NOT_EXIST'}, status = 404)
         
-        sub_category = SubCategory.objects.get(id = subcategory_id)
+        sub_category      = SubCategory.objects.get(id = subcategory_id)
         sub_category_info = {
             'id'                 : sub_category.id,
             'name'               : sub_category.name,
@@ -107,7 +107,7 @@ class NavigatorView(View) :
         if not Category.objects.filter(id = category_id).exists() :
             return JsonResponse({'MESSAGE' : 'CATEGORY_DOES_NOT_EXIST'}, status = 404)
         
-        category = Category.objects.prefetch_related('subcategory_set__product_set').annotate(products_count = Count('subcategory__product')).get(id = category_id)
+        category      = Category.objects.prefetch_related('subcategory_set__product_set').annotate(products_count = Count('subcategory__product')).get(id = category_id)
         category_list = {
             'category_id' : category.id,
             'category_name' : category.name,
