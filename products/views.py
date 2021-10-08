@@ -56,7 +56,7 @@ class ProductDetailView(View) :
         if not Product.objects.filter(id = product_id).exists() :
             return JsonResponse({'MESSAGE' : 'PRODUCT_DOES_NOT_EXIST'}, status = 404)
         
-        product = Product.objects.get(id = product_id)
+        product = Product.objects.prefetch_related('option_set', 'tags', 'detailimage_set').get(id = product_id)
         product_info = {
             'id'            : product.id,
             'name'          : product.name,
@@ -120,8 +120,3 @@ class NavigatorView(View) :
         }
 
         return JsonResponse({'DATA' : category_list}, status = 200)
-        
-
-
-
-
