@@ -15,6 +15,8 @@ class Product(models.Model) :
     tags          = models.ManyToManyField('Tag', through = 'ProductTag')
     name          = models.CharField(max_length = 50)
     thumbnail_url = models.CharField(max_length = 1000)
+    how_to        = models.CharField(max_length = 2000, null = True, default = None)
+    ingredients   = models.CharField(max_length = 2000, null = True, default = None)
     created_at    = models.DateTimeField(auto_now_add = True)
     deleted_at    = models.DateTimeField(null = True, default = None)
 

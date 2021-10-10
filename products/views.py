@@ -3,9 +3,11 @@ import json
 from django.views                           import View
 from django.http                            import JsonResponse
 from django.db.models                       import Q
-from django.db.models.aggregates            import Count, Min
+from django.db.models.aggregates            import Avg, Count, Min
+from django.db.models.query                 import Prefetch
 
 from products.models                        import Category, Product
+from reviews.models                         import Review
 
 class ProductView(View) :
     def get(self, request) :
@@ -98,21 +100,29 @@ class ProductDetailView(View) :
             if not Product.objects.filter(id = product_id).exists() :
                 return JsonResponse({'message' : 'INVALID_PRODUCT_ID'}, status = 404)
         
-            product      = Product.objects.prefetch_related('option_set', 'tags', 'detailimage_set').get(id = product_id)
+            product = Product.objects.prefetch_related('option_set', 'tags', 'detailimage_set', Prefetch('review_set', queryset = Review.objects.filter(product = product_id).order_by('-created_at')))\
+                      .annotate(rating_average = Avg('review__rating')).get(id = product_id)
+            
             product_info = {
-                'id'            : product.id,
-                'name'          : product.name,
-                'thumbnail_url' : product.thumbnail_url,
-                'options'       : [{
-                    'option_id' : option.id,
-                    'price'     : option.price,
-                    'size'      : option.size,
+                'id'                 : product.id,
+                'name'               : product.name,
+                'thumbnail_url'      : product.thumbnail_url,
+                'how_to'             : product.how_to,
+                'ingredients'        : product.ingredients,
+                'options'            : [{
+                    'option_id'      : option.id,
+                    'price'          : option.price,
+                    'size'           : option.size,
                 } for option in product.option_set.all()],
-                'tags'          : [tag.name for tag in product.tags.all()],
-                'detail_images' : [image.image_url for image in product.detailimage_set.all()]
+                'tags'               : [tag.name for tag in product.tags.all()],
+                'detail_images'      : [image.image_url for image in product.detailimage_set.all()],
+                'rating_average'     : round(product.rating_average, 1) if product.rating_average else 0,
+                'review_count'       : product.review_set.count(),
+                'photo_review_count' : len([review.image_url for review in product.review_set.all() if review.image_url]),
+                'review_images'      : [review.image_url for review in product.review_set.all() if review.image_url][:4]
             }
 
-            return JsonResponse({'DATA' : product_info}, status = 200)
+            return JsonResponse({'product_info' : product_info}, status = 200)
         
         except Product.DoesNotExist :
             return JsonResponse({'message' : 'INVALID_PRODUCT_ID'}, status = 404)
