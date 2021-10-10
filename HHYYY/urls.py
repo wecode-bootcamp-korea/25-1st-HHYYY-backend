@@ -14,12 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls                import path, include
-from products.views             import CategoryView, SubCategoryView, NavigatorView
 
 urlpatterns = [
     path('users', include('users.urls')),
     path('products', include('products.urls')),
-    path('category/<int:category_id>', CategoryView.as_view()),
-    path('category/subcategory/<int:subcategory_id>', SubCategoryView.as_view()),
-    path('navigator/<int:category_id>', NavigatorView.as_view()),
 ]

@@ -1,29 +1,22 @@
 from django.db import models
+from django.db.models.deletion import CASCADE
 
 class Category(models.Model) :
-    name        = models.CharField(max_length = 50)
-    image_url   = models.CharField(max_length = 1000)
-    description = models.CharField(max_length = 300)
+    name            = models.CharField(max_length = 50)
+    image_url       = models.CharField(max_length = 1000)
+    description     = models.CharField(max_length = 300)
+    main_category   = models.ForeignKey('self', on_delete = models.CASCADE, null = True, related_name = 'sub_category')
 
     class Meta :
         db_table = 'categories'
 
-class SubCategory(models.Model) :
-    category    = models.ForeignKey('Category', on_delete = models.CASCADE)
-    name        = models.CharField(max_length = 50)
-    image_url   = models.CharField(max_length = 1000)
-    description = models.CharField(max_length = 300)
-
-    class Meta :
-        db_table = 'sub_categories'
-
 class Product(models.Model) :
-    sub_category  = models.ForeignKey('SubCategory', on_delete = models.PROTECT)
-    tags           = models.ManyToManyField('Tag', through = 'ProductTag')
+    category      = models.ForeignKey('Category', on_delete = CASCADE)
+    tags          = models.ManyToManyField('Tag', through = 'ProductTag')
     name          = models.CharField(max_length = 50)
     thumbnail_url = models.CharField(max_length = 1000)
     created_at    = models.DateTimeField(auto_now_add = True)
-    deleted_at    = models.DateTimeField(null = True)
+    deleted_at    = models.DateTimeField(null = True, default = None)
 
     class Meta :
         db_table = 'products'
