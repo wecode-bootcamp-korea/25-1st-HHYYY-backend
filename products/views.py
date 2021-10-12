@@ -105,7 +105,7 @@ class ProductDetailView(View) :
         except Product.MultipleObjectsReturned :
             return JsonResponse({'message' : 'MULTIPLE_PRODUCT_ERROR'}, status = 400)
 
-class CategoryView(View) :
+class NavigatorView(View) :
     def get(self, request, category_id) :
         try :
             if not Category.objects.filter(id = category_id).exists() :
@@ -114,7 +114,7 @@ class CategoryView(View) :
             category = Category.objects.select_related('main_category').get(id = category_id)
 
             if category.main_category == None :      
-                category_list = {
+                navigator_list = {
                     'category_id'                 : category.id,
                     'category_name'               : category.name,
                     'category_products_count'     : Product.objects.filter(category__main_category = category).count(),
@@ -126,7 +126,7 @@ class CategoryView(View) :
                 }
 
             else :
-                category_list = {
+                navigator_list = {
                     'category_id'                 : category.main_category.id,
                     'category_name'               : category.main_category.name,
                     'category_products_count'     : Product.objects.filter(category__main_category = category.main_category).count(),
@@ -137,10 +137,21 @@ class CategoryView(View) :
                     } for sub_category in category.main_category.sub_category.prefetch_related('product_set').all()]
                 }
             
-            return JsonResponse({'category_list' : category_list}, status = 200)
+            return JsonResponse({'navigator_list' : navigator_list}, status = 200)
         
         except Category.DoesNotExist :
             return JsonResponse({'message' : 'INVALID_CATEGORY_ID'}, status = 404)
         
         except Category.MultipleObjectsReturned :
             return JsonResponse({'message' : 'MULTIPLE_CATEGORY_ERROR'}, status = 400)
+
+class CategoryView(View) :
+    def get(self, request) :
+        categories     = Category.objects.all()
+        
+        category_list  = [{
+            'category_id'   : category.id,
+            'category_name' : category.name,
+        }for category in categories]
+
+        return JsonResponse({'category_list' : category_list})
