@@ -28,10 +28,10 @@ class ProductView(View) :
 
             products_filter = Q(deleted_at = None)
             category_info   = {}
-            category_list   = {}
 
             if category_id :
                 category = Category.objects.select_related('main_category').get(id = category_id)
+                products_filter.add(Q(category = category) if category.main_category else Q(category__main_category = category), Q.AND)
 
                 category_info = {
                     'id'             : category.id,
@@ -40,36 +40,8 @@ class ProductView(View) :
                     'description'    : category.description,
                 }
 
-                if category.main_category == None :
-                    products_filter.add(Q(category__main_category = category_id), Q.AND)
-
-                    category_list = {
-                        'category_id'                 : category.id,
-                        'category_name'               : category.name,
-                        'category_products_count'     : Product.objects.filter(category__main_category = category).count(),
-                        'sub_categories'              : [{
-                        'sub_category_id'             : sub_category.id,
-                        'sub_category_name'           : sub_category.name,
-                        'sub_category_products_count' : sub_category.product_set.count()
-                        } for sub_category in category.sub_category.prefetch_related('product_set').all()]
-                    }
-
-                else :
-                    products_filter.add((Q(category = category_id)), Q.AND)
-
-                    category_list = {
-                        'category_id'                 : category.main_category.id,
-                        'category_name'               : category.main_category.name,
-                        'category_products_count'     : Product.objects.filter(category__main_category = category.main_category).count(),
-                        'sub_categories'              : [{
-                        'sub_category_id'             : sub_category.id,
-                        'sub_category_name'           : sub_category.name,
-                        'sub_category_products_count' : sub_category.product_set.count()
-                        } for sub_category in category.main_category.sub_category.prefetch_related('product_set').all()]
-                    }
-        
             if search :
-                products_filter.add(Q(name__icontains = search)|Q(category__main_category__name__exact = search)|Q(category__name__exact = search), Q.AND)
+                products_filter.add(Q(name__icontains = search)|Q(category__main_category__name = search)|Q(category__name = search), Q.AND)
         
             products = Product.objects.filter(products_filter).prefetch_related('tags').annotate(price = Min('option__price'), review_count = Count('review'))\
                        .order_by(sort_by.get(sort, 'id'))
@@ -86,7 +58,7 @@ class ProductView(View) :
                 'tags'          : [tag.name for tag in product.tags.all()]
             } for product in products]
 
-            return JsonResponse({'category_info' : category_info, 'category_list' : category_list, 'products_list' : products_list}, status = 200)
+            return JsonResponse({'category_info' : category_info, 'products_list' : products_list}, status = 200)
         
         except Category.DoesNotExist :
             return JsonResponse({'message' : 'INVALID_CATEGORY_ID'}, status = 404)
@@ -100,8 +72,9 @@ class ProductDetailView(View) :
             if not Product.objects.filter(id = product_id).exists() :
                 return JsonResponse({'message' : 'INVALID_PRODUCT_ID'}, status = 404)
         
-            product = Product.objects.prefetch_related('option_set', 'tags', 'detailimage_set', Prefetch('review_set', queryset = Review.objects.filter(product = product_id).order_by('-created_at')))\
-                      .annotate(rating_average = Avg('review__rating')).get(id = product_id)
+            product = Product.objects.prefetch_related(
+                     'option_set', 'tags', 'detailimage_set', Prefetch('review_set', queryset = Review.objects.filter(product = product_id).order_by('-created_at')))\
+                      .select_related('category__main_category').annotate(rating_average = Avg('review__rating')).get(id = product_id)
             
             product_info = {
                 'id'                 : product.id,
@@ -115,6 +88,8 @@ class ProductDetailView(View) :
                     'size'           : option.size,
                 } for option in product.option_set.all()],
                 'tags'               : [tag.name for tag in product.tags.all()],
+                'main_category_name' : product.category.main_category.name,
+                'sub_category_name'  : product.category.name,
                 'detail_images'      : [image.image_url for image in product.detailimage_set.all()],
                 'rating_average'     : round(product.rating_average, 1) if product.rating_average else 0,
                 'review_count'       : product.review_set.count(),
@@ -129,3 +104,43 @@ class ProductDetailView(View) :
         
         except Product.MultipleObjectsReturned :
             return JsonResponse({'message' : 'MULTIPLE_PRODUCT_ERROR'}, status = 400)
+
+class CategoryView(View) :
+    def get(self, request, category_id) :
+        try :
+            if not Category.objects.filter(id = category_id).exists() :
+                return JsonResponse({'message' : 'INVALID_CATEGORY_ID'}, status = 404)
+         
+            category = Category.objects.select_related('main_category').get(id = category_id)
+
+            if category.main_category == None :      
+                category_list = {
+                    'category_id'                 : category.id,
+                    'category_name'               : category.name,
+                    'category_products_count'     : Product.objects.filter(category__main_category = category).count(),
+                    'sub_categories'              : [{
+                    'sub_category_id'             : sub_category.id,
+                    'sub_category_name'           : sub_category.name,
+                    'sub_category_products_count' : sub_category.product_set.count()
+                    } for sub_category in category.sub_category.prefetch_related('product_set').all()]
+                }
+
+            else :
+                category_list = {
+                    'category_id'                 : category.main_category.id,
+                    'category_name'               : category.main_category.name,
+                    'category_products_count'     : Product.objects.filter(category__main_category = category.main_category).count(),
+                    'sub_categories'              : [{
+                    'sub_category_id'             : sub_category.id,
+                    'sub_category_name'           : sub_category.name,
+                    'sub_category_products_count' : sub_category.product_set.count()
+                    } for sub_category in category.main_category.sub_category.prefetch_related('product_set').all()]
+                }
+            
+            return JsonResponse({'category_list' : category_list}, status = 200)
+        
+        except Category.DoesNotExist :
+            return JsonResponse({'message' : 'INVALID_CATEGORY_ID'}, status = 404)
+        
+        except Category.MultipleObjectsReturned :
+            return JsonResponse({'message' : 'MULTIPLE_CATEGORY_ERROR'}, status = 400)
