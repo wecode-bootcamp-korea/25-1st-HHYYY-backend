@@ -6,7 +6,7 @@ import jwt
 from django.http            import JsonResponse
 from django.views           import View
 from json.decoder           import JSONDecodeError
-from django.conf.settings   import SECRET_KEY, ALGORITHM
+from django.conf            import settings
 
 from users.models           import User
 
@@ -17,7 +17,7 @@ class SignUpView(View):
             email        = data['email']
             password     = data['password']
             phone_number = data.get('phone_number')
-            name         = data.get('name')
+            name         = data.get('name') 
             address      = data.get('address')
 
             REGEX_EMAIL    = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
@@ -64,7 +64,7 @@ class SignInView(View):
             if not bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
                 return JsonResponse({'message':'INVALID_PASSWORD'}, status=401)
             
-            token = jwt.encode({'id' : user.id}, SECRET_KEY, algorithm=ALGORITHM)
+            token = jwt.encode({'id' : user.id}, settings.SECRET_KEY, algorithm = settings.ALGORITHM)
 
             return JsonResponse({'token':token}, status=200)
 
