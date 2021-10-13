@@ -99,7 +99,7 @@ class ReviewDetailView(View):
             user = request.user
             data = json.loads(request.body)
             if not Review.objects.filter(id=review_id).exists():
-                return JsonResponse({'message' : 'REIVEW_DOES_NOT_EXIST'}, status = 404)
+                return JsonResponse({'message' : 'INVALID_REIVEW_ID'}, status = 404)
 
             review = Review.objects.get(id=review_id)
 
@@ -150,7 +150,7 @@ class ReviewCommentView(View):
     def get(self, request, review_id):
         
         if not Review.objects.filter(id = review_id).exists():
-            return JsonResponse({'messages' : 'REVIEW_DOSE_NOT_EXISTS'}, status = 404)
+            return JsonResponse({'messages' : 'INVALID_REVIEW_ID'}, status = 404)
 
         comments_list = [{
             'user_name'    : comment.user.name,
@@ -165,7 +165,7 @@ class ReviewCommentView(View):
     def post(self, request, review_id):
         try :
             if not Review.objects.filter(id = review_id).exists() :
-                return JsonResponse({'messages' : 'REVIEW_DOSE_NOT_EXISTS'}, status = 404)
+                return JsonResponse({'messages' : 'INVALID_REVIEW_ID'}, status = 404)
 
             data = json.loads(request.body)
             user = request.user
@@ -188,7 +188,7 @@ class ReviewCommentView(View):
         try :
             user = request.user
             if not ReviewComment.objects.filter(id = comment_id).exists() :
-                return JsonResponse({'message' : 'COMMENT_DOSE_NOT_EXISTS'}, status = 404)
+                return JsonResponse({'message' : 'INVALID_COMMENT_ID'}, status = 404)
 
             comment = ReviewComment.objects.get(id = comment_id)
 
@@ -211,7 +211,7 @@ class ReviewCommentView(View):
             data = json.loads(request.body)
 
             if not ReviewComment.objects.filter(id = commnet_id).exists() :
-                return JsonResponse({'message' : 'COMMNET_DOES_NOT_EXIST'}, status = 404)
+                return JsonResponse({'message' : 'INVALID_COMMNET_ID'}, status = 404)
 
             comment = ReviewComment.objects.get(id = commnet_id)
 
@@ -240,7 +240,7 @@ class ReviewLikeView(View):
             user = request.user
 
             if not Review.objects.filter(id=review_id).exists():
-                return JsonResponse({'message' : 'REVIEW_DOES_bot_EXIST'}, status = 404)
+                return JsonResponse({'message' : 'INVALID_REVIEW_ID'}, status = 404)
 
             review = Review.objects.get(id=review_id)
 
