@@ -7,10 +7,9 @@ from django.conf  import settings
 from users.models import User
 
 def signin_decorator(func):
-    def wrapper(self, request, *args, **kwargs):
-        
+    def wrapper(self, request, *args, **kwargs):       
         if "Authorization" not in request.headers: 
-            return JsonResponse ({"message" : "INVALTD_LOGIN"}, status=401)
+            return JsonResponse ({"message" : "UNAUTHORIZED"}, status=401)
 
         encode_token = request.headers["Authorization"]
 
@@ -20,7 +19,7 @@ def signin_decorator(func):
             request.user = user
 
         except jwt.exceptions.DecodeError:
-            return JsonResponse({"massage":"INVAILITD_TOKEN"}, status=401)
+            return JsonResponse({"massage":"JWT_MALFORMED"}, status=401)
 
         except User.DoesNotExist:
             return JsonResponse({"message":"UNKNOWN_USER"}, status=401)
