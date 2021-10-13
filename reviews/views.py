@@ -20,6 +20,9 @@ class ReviewView(View):
             user   = request.user
             rating = int(data.get('rating'))
 
+            if rating > 5 :
+                return JsonResponse({'message' : 'INVALID_RATING'}, status = 400)
+
             Review.objects.create(
                 user      = user,
                 product   = Product.objects.get(id = product_id),
