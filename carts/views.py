@@ -7,10 +7,10 @@ from json.decoder                           import JSONDecodeError
 
 from carts.models                           import Cart
 from products.models                        import Option
-# 로그인 데코레이터 지훈님 브랜치에 있어서 추후 import 예정
+from users.decorators                       import signin_decorator
 
 class CartView(View) :
-    @login_decorator
+    @signin_decorator
     def post(self, request):
         try :
             data      = json.loads(request.body)
@@ -37,7 +37,7 @@ class CartView(View) :
         except KeyError:
             return JsonResponse({'message' : "KEY_ERROR"}, status = 400)
     
-    @login_decorator
+    @signin_decorator
     def get(self, request):
         FREE_SHIPPING = 30000
         SHIPPING      = 2500
@@ -67,7 +67,7 @@ class CartView(View) :
         }, status = 200)
 
 class CartDetailView(View):
-    @login_decorator
+    @signin_decorator
     def delete(self, request, cart_id):
         try : 
             if not Cart.objects.filter(id = cart_id, user = request.user).exists():
@@ -84,7 +84,7 @@ class CartDetailView(View):
         except Cart.MultipleObjectsReturned:
             return JsonResponse({'message' : 'MULTIPLE_CART_ERROR'}, status = 400)
     
-    @login_decorator
+    @signin_decorator
     def patch(self, request, cart_id):
         try :
             if not Cart.objects.filter(id = cart_id, user = request.user).exists():
