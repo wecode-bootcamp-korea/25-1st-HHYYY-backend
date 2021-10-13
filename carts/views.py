@@ -56,14 +56,16 @@ class CartView(View) :
         }for item in carts]
 
         total_price    = int(carts.aggregate(total = Sum(F('quantity')*F('option__price')))['total'] or 0)
+        total_quantity = len(cart_list)
         shipping_price = 0 if total_price >= FREE_SHIPPING or total_price == 0 else SHIPPING
         order_price    = total_price + shipping_price
 
         return JsonResponse({
-            'cart_list'   : cart_list,
-            'total_price' : total_price,
-            'shipping'    : shipping_price,
-            'order_price' : order_price,
+            'cart_list'      : cart_list,
+            'total_price'    : total_price,
+            'total_quantity' : total_quantity,
+            'shipping'       : shipping_price,
+            'order_price'    : order_price,
         }, status = 200)
 
 class CartDetailView(View):

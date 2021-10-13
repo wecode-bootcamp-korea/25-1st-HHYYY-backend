@@ -23,4 +23,5 @@ urlpatterns = [
     path('category', CategoryView.as_view()),
     path('navigator/<int:category_id>', NavigatorView.as_view()),
     path('carts', include('carts.urls')),
+    path('reviews', include('reviews.urls')),
 ]
