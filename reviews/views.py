@@ -11,7 +11,7 @@ from users.decorators       import signin_decorator
 
 class ReviewView(View):
     @signin_decorator
-    def post(self, request, product_id) :
+    def post(self, request, product_id):
         try:
             if not Product.objects.filter(id = product_id).exists() :
                 return JsonResponse({'message' : 'INVALID_PRODUCT_ID'}, status = 404)
@@ -37,7 +37,7 @@ class ReviewView(View):
             return JsonResponse({'message':'JSON_DECODE_ERROR'}, status = 400)
 
     @signin_decorator
-    def get(self, request, product_id) :
+    def get(self, request, product_id):
         try :
             if not Product.objects.filter(id = product_id).exists() :
                     return JsonResponse({'message' : 'INVALID_PRODUCT_ID'}, status = 404)
@@ -70,9 +70,9 @@ class ReviewView(View):
         except Review.MultipleObjectsReturned :
             return JsonResponse({'message' : 'MULTIPLE_OBJECTS_ERROR'}, status = 400)
 
-class ReviewDetailView(View) :
+class ReviewDetailView(View):
     @signin_decorator
-    def delete(self, request, review_id) :
+    def delete(self, request, review_id):
         try:
             user = request.user
             if not Review.objects.filter(id=review_id).exists():
@@ -94,7 +94,7 @@ class ReviewDetailView(View) :
             return JsonResponse({'message' : 'MULTIPLE_OBJECTS_ERROR'}, status = 400)
 
     @signin_decorator
-    def patch(self, request, review_id) :
+    def patch(self, request, review_id):
         try :
             user = request.user
             data = json.loads(request.body)
@@ -121,7 +121,7 @@ class ReviewDetailView(View) :
         except Review.MultipleObjectsReturned :
             return JsonResponse({'message' : 'MULTIPLE_OBJECTS_ERROR'}, status = 400)
 
-    def get(self, request, review_id) :
+    def get(self, request, review_id):
         try : 
             if not Review.objects.filter(id = review_id).exists():
                 return JsonResponse({'message' : 'INVALID_REVIEW_ID'}, status = 404)
@@ -146,8 +146,8 @@ class ReviewDetailView(View) :
             return JsonResponse({'message' : 'MULTIPLE_OBJECTS_ERROR'}, status = 400)
     
 
-class ReviewCommentView(View) :
-    def get(self, request, review_id) :
+class ReviewCommentView(View):
+    def get(self, request, review_id):
         
         if not Review.objects.filter(id = review_id).exists():
             return JsonResponse({'messages' : 'REVIEW_DOSE_NOT_EXISTS'}, status = 404)
@@ -162,7 +162,7 @@ class ReviewCommentView(View) :
         return JsonResponse({'commnets_list' : comments_list }, status = 200)
 
     @signin_decorator
-    def post(self, request, review_id) :
+    def post(self, request, review_id):
         try :
             if not Review.objects.filter(id = review_id).exists() :
                 return JsonResponse({'messages' : 'REVIEW_DOSE_NOT_EXISTS'}, status = 404)
@@ -184,7 +184,7 @@ class ReviewCommentView(View) :
             return JsonResponse({'message' : 'MULTIPLE_OBJECTS_ERROR'}, status = 400)
 
     @signin_decorator
-    def delete(self, request, comment_id) :
+    def delete(self, request, comment_id):
         try :
             user = request.user
             if not ReviewComment.objects.filter(id = comment_id).exists() :
@@ -205,7 +205,7 @@ class ReviewCommentView(View) :
         except ReviewComment.MultipleObjectsReturned :
             return JsonResponse({'message' : 'MULTIPLE_OBJECTS_ERROR'}, status = 400) 
 
-    def patch(self, request, commnet_id) :
+    def patch(self, request, commnet_id):
         try :
             user = request.user
             data = json.loads(request.body)
