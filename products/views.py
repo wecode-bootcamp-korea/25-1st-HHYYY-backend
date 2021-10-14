@@ -75,7 +75,7 @@ class ProductView(View) :
             products_list = [{
                 'id'            : product.id,
                 'name'          : product.name,
-                'thumnbail_url' : product.thumbnail_url,
+                'thumbnail_url' : product.thumbnail_url,
                 'price'         : product.price,
                 'tags'          : [tag.name for tag in product.tags.all()]
             } for product in products]
