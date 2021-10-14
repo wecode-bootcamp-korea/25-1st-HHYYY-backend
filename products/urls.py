@@ -1,6 +1,6 @@
 from django.urls            import path
 
-from products.views         import ProductView, ProductDetailView, NavigatorView
+from products.views         import ProductView, ProductDetailView
 from reviews.views          import ReviewView
 
 urlpatterns = [
