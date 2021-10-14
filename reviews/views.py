@@ -20,9 +20,12 @@ class ReviewView(View):
             user   = request.user
             rating = int(data.get('rating'))
 
+            if rating > 5 :
+                return JsonResponse({'message' : 'INVALID_RATING'}, status = 400)
+
             Review.objects.create(
                 user      = user,
-                product   = Product.objects.get(id = product_id),
+                product   = product_id,
                 content   = data.get('content'),
                 rating    = rating,
                 image_url = data.get('image_url')
@@ -35,8 +38,8 @@ class ReviewView(View):
 
         except JSONDecodeError:
             return JsonResponse({'message':'JSON_DECODE_ERROR'}, status = 400)
+            
 
-    @signin_decorator
     def get(self, request, product_id):
         try :
             if not Product.objects.filter(id = product_id).exists() :
@@ -57,9 +60,9 @@ class ReviewView(View):
                 'content'       : review.content,
                 'image'         : review.image_url,
                 'rating'        : review.rating,
-                'like_count'    : review.review_like_set.all().count(),
-                'comment_count' : review.review_comment_set.all().count(),
-                'created_at'    : review.created.at,
+                'like_count'    : review.reviewlike_set.all().count(),
+                'comment_count' : review.reviewcomment_set.all().count(),
+                'created_at'    : review.created_at,
             } for review in reviews]
 
             return JsonResponse({'DATA' : review_list}, status = 200)
@@ -145,7 +148,6 @@ class ReviewDetailView(View):
         except Review.MultipleObjectsReturned :
             return JsonResponse({'message' : 'MULTIPLE_OBJECTS_ERROR'}, status = 400)
     
-
 class ReviewCommentView(View):
     def get(self, request, review_id):
         
@@ -172,7 +174,7 @@ class ReviewCommentView(View):
 
             ReviewComment.objects.create(
                 user = user,
-                review = Review.object.get(id = review_id),
+                review = review_id,
                 content = data.get('content'),
             )
             return JsonResponse({'message' : 'SUCCESS'}, status = 200)
@@ -183,6 +185,7 @@ class ReviewCommentView(View):
         except Review.MultipleObjectsReturned :
             return JsonResponse({'message' : 'MULTIPLE_OBJECTS_ERROR'}, status = 400)
 
+class ReivewCommentDetailView(View):
     @signin_decorator
     def delete(self, request, comment_id):
         try :
