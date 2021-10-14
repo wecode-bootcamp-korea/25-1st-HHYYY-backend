@@ -15,10 +15,13 @@ Including another URLconf
 """
 from django.urls                import path, include
 
-from products.views             import CategoryView
+from products.views             import CategoryView, NavigatorView
 
 urlpatterns = [
     path('users', include('users.urls')),
     path('products', include('products.urls')),
     path('category', CategoryView.as_view()),
+    path('navigator/<int:category_id>', NavigatorView.as_view()),
+    path('carts', include('carts.urls')),
+    path('reviews', include('reviews.urls')),
 ]

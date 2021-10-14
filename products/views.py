@@ -94,6 +94,7 @@ class ProductDetailView(View) :
                 'rating_average'     : round(product.rating_average, 1) if product.rating_average else 0,
                 'review_count'       : product.review_set.count(),
                 'photo_review_count' : len([review.image_url for review in product.review_set.all() if review.image_url]),
+                'review_id'          : [review.id for review in product.review_set.all()][:4],
                 'review_images'      : [review.image_url for review in product.review_set.all() if review.image_url][:4]
             }
 
