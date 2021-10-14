@@ -9,6 +9,28 @@ from django.db.models.query                 import Prefetch
 from products.models                        import Category, Product
 from reviews.models                         import Review
 
+class Navigator :
+    def __init__(self, category) :
+        self.category = category
+    
+    def get_category(self) :
+        category = self.category.main_category if self.category.main_category else self.category
+        return category
+    
+    def gennerate_navigator_list(self) :
+        navigator_list = {
+            'category_id'                 : self.get_category().id,
+            'category_name'               : self.get_category().name,
+            'category_products_count'     : Product.objects.filter(category__main_category = self.get_category()).count(),
+            'sub_categories'              : [{
+            'sub_category_id'             : sub_category.id,
+            'sub_category_name'           : sub_category.name,
+            'sub_category_products_count' : sub_category.product_set.count()
+            } for sub_category in self.get_category().sub_category.prefetch_related('product_set').all()]
+            }
+
+        return navigator_list
+
 class ProductView(View) :
     def get(self, request) :
         try :
@@ -53,12 +75,14 @@ class ProductView(View) :
             products_list = [{
                 'id'            : product.id,
                 'name'          : product.name,
-                'thumnbail_url' : product.thumbnail_url,
+                'thumbnail_url' : product.thumbnail_url,
                 'price'         : product.price,
                 'tags'          : [tag.name for tag in product.tags.all()]
             } for product in products]
 
-            return JsonResponse({'category_info' : category_info, 'products_list' : products_list}, status = 200)
+            products_count = len(products_list)
+
+            return JsonResponse({'category_info' : category_info, 'products_list' : products_list, 'products_count' : products_count}, status = 200)
         
         except Category.DoesNotExist :
             return JsonResponse({'message' : 'INVALID_CATEGORY_ID'}, status = 404)
@@ -94,7 +118,7 @@ class ProductDetailView(View) :
                 'rating_average'     : round(product.rating_average, 1) if product.rating_average else 0,
                 'review_count'       : product.review_set.count(),
                 'photo_review_count' : len([review.image_url for review in product.review_set.all() if review.image_url]),
-                'review_id'          : [review.id for review in product.review_set.all()][:4],
+                'review_id'          : [review.id for review in product.review_set.all() if review.image_url][:4],
                 'review_images'      : [review.image_url for review in product.review_set.all() if review.image_url][:4]
             }
 
@@ -112,31 +136,9 @@ class NavigatorView(View) :
             if not Category.objects.filter(id = category_id).exists() :
                 return JsonResponse({'message' : 'INVALID_CATEGORY_ID'}, status = 404)
          
-            category = Category.objects.select_related('main_category').get(id = category_id)
-
-            if category.main_category == None :      
-                navigator_list = {
-                    'category_id'                 : category.id,
-                    'category_name'               : category.name,
-                    'category_products_count'     : Product.objects.filter(category__main_category = category).count(),
-                    'sub_categories'              : [{
-                    'sub_category_id'             : sub_category.id,
-                    'sub_category_name'           : sub_category.name,
-                    'sub_category_products_count' : sub_category.product_set.count()
-                    } for sub_category in category.sub_category.prefetch_related('product_set').all()]
-                }
-
-            else :
-                navigator_list = {
-                    'category_id'                 : category.main_category.id,
-                    'category_name'               : category.main_category.name,
-                    'category_products_count'     : Product.objects.filter(category__main_category = category.main_category).count(),
-                    'sub_categories'              : [{
-                    'sub_category_id'             : sub_category.id,
-                    'sub_category_name'           : sub_category.name,
-                    'sub_category_products_count' : sub_category.product_set.count()
-                    } for sub_category in category.main_category.sub_category.prefetch_related('product_set').all()]
-                }
+            category       = Category.objects.select_related('main_category').get(id = category_id)
+            navigator      = Navigator(category)
+            navigator_list = navigator.gennerate_navigator_list()
             
             return JsonResponse({'navigator_list' : navigator_list}, status = 200)
         
@@ -153,6 +155,6 @@ class CategoryView(View) :
         category_list  = [{
             'category_id'   : category.id,
             'category_name' : category.name,
-        }for category in categories]
+        } for category in categories]
 
         return JsonResponse({'category_list' : category_list})
