@@ -80,7 +80,9 @@ class ProductView(View) :
                 'tags'          : [tag.name for tag in product.tags.all()]
             } for product in products]
 
-            return JsonResponse({'category_info' : category_info, 'products_list' : products_list}, status = 200)
+            products_count = len(products_list)
+
+            return JsonResponse({'category_info' : category_info, 'products_list' : products_list, 'products_count' : products_count}, status = 200)
         
         except Category.DoesNotExist :
             return JsonResponse({'message' : 'INVALID_CATEGORY_ID'}, status = 404)
