@@ -24,7 +24,9 @@
 ## 적용 기술
 
 > ✔️ **Front-End** : React, SASS, JSX
+
 > ✔️ **Back-End** : Django, Python, MySQL, jwt, bcypt, AWS RDS, AWS EC2
+
 > ✔️ **Common** : Git, Github, Slack, Trello, Postman
 
 ## 구현 기능
